@@ -1,0 +1,19 @@
+
+FROM ubuntu:latest
+RUN apt update && apt install  openssh-server sudo -y && \ 
+    useradd -d /home/remote_user -s /bin/bash -m -G sudo remote_user  && \
+    echo "remote_user:1234" | chpasswd && \
+    mkdir /home/remote_user/.ssh && \
+    chmod 700 /home/remote_user/.ssh 
+
+COPY remote-key.pub /home/remote_user/.ssh/authorized_keys
+
+RUN chown remote_user -R /home/remote_user/.ssh/ && \
+    chmod 600 /home/remote_user/.ssh/authorized_keys && \
+    echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+RUN service ssh start
+
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd","-D"]
